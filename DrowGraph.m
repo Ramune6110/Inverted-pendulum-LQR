@@ -1,0 +1,40 @@
+clear;
+close all;
+clc;
+% reading file
+fileID = fopen('data_class.txt', 'r');
+formatSpec = '%f';
+size = [5 251];
+data = fscanf(fileID, formatSpec, size);
+% graph
+figure(1);
+set(groot, 'DefaultTextInterpreter', 'Latex');
+set(groot, 'DefaultLegendInterpreter', 'Latex');
+for i = 1 : 4
+    subplot(2, 2, i);
+    plot(data(1, :), data(i + 1, :), 'b', 'LineWidth', 2); hold on;
+    xlim([0 25]);
+    switch i
+        case 1
+            xlabel('time[sec]');
+            ylabel('$x$');
+            legend('$x$');
+        case 2
+            xlabel('time[sec]');
+            ylabel('$\theta$');
+            legend('$\theta$');
+        case 3
+            xlabel('time[sec]');
+            ylabel('$\dot{x}$');
+            legend('$\dot{x}$');
+        case 4
+            xlabel('time[sec]');
+            ylabel('$\dot{\theta}$');
+            legend('$\dot{\theta}$');
+        otherwise
+            disp('Error');
+    end
+    grid on;
+end
+% Auto save graph
+saveas(gcf, 'LQR_result.png');
