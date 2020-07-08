@@ -24,7 +24,7 @@ LQR_control::LQR_control() {
          0, -(pow(m, 2.0) * pow(l, 2.0) * g) / alpha, 0, 0,
          0, ((M + m) * m * g * l) / alpha, 0, 0;
 
-    B << 0, 0, (J * m * pow(l, 2.0)) / alpha, -(m * l) / alpha;
+    B << 0, 0, (J + m * pow(l, 2.0)) / alpha, -(m * l) / alpha;
 
     C << 1, 0, 0, 0;
 
