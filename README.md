@@ -11,6 +11,8 @@ sudo apt-get install libeigen3-dev
 ```
 ## Result
 ![LQR](https://github.com/Ramune6110/Inverted-pendulum-LQR/blob/master/LQR_result.png)  
+## Estimate State
+![Estimate](https://github.com/Ramune6110/Inverted-pendulum-LQR/blob/master/Estimate.png)
 ## Environment
 Ubuntu18.04
 ## Procedure
