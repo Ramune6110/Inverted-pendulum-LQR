@@ -2,18 +2,17 @@ clear;
 close all;
 clc;
 % reading file
-fileID = fopen('LQR_Kalman.txt', 'r');
+fileID = fopen('data_class.txt', 'r');
 formatSpec = '%f';
-size = [13 251];
+size = [9 251];
 data = fscanf(fileID, formatSpec, size);
 % graph
-fig1 = figure(1);
+figure(1);
 set(groot, 'DefaultTextInterpreter', 'Latex');
 set(groot, 'DefaultLegendInterpreter', 'Latex');
 for i = 1 : 4
     subplot(2, 2, i);
-    plot(data(1, :), data(i + 1, :), 'b'); hold on;
-    plot(data(1, :), data(i + 9, :), '--r'); hold on;
+    plot(data(1, :), data(i + 1, :), 'b', 'LineWidth', 2); hold on;
     xlim([0 25]);
     switch i
         case 1
@@ -36,16 +35,12 @@ for i = 1 : 4
             disp('Error');
     end
     grid on;
-end
-
-
-fig2 = figure(2);
+endfigure(1);
 set(groot, 'DefaultTextInterpreter', 'Latex');
 set(groot, 'DefaultLegendInterpreter', 'Latex');
 for i = 1 : 4
     subplot(2, 2, i);
-    plot(data(1, :), data(i + 1, :), 'b'); hold on;
-    plot(data(1, :), data(i + 5, :), '--r'); hold on;
+    plot(data(1, :), data(i + 1, :), 'b', 'LineWidth', 2); hold on;
     xlim([0 25]);
     switch i
         case 1
@@ -71,5 +66,4 @@ for i = 1 : 4
 end
 
 % Auto save graph
-saveas(fig1, 'LQR_result.png');
-saveas(fig2, 'Estimate.png');
+saveas(gcf, 'LQR_result.png');

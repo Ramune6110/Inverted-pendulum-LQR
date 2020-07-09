@@ -1,13 +1,15 @@
 #include <iostream>
 #include <Eigen/Dense>
 #include <cstdio>
+#include <cmath>
+#include <random>
 #include "lqr_control.h"
 
 using namespace std;
 using namespace Eigen;
 
 LQR_control::LQR_control() {
-    // paramater
+    // LQR paramater
     M = 0.7;
     m = 0.12;
     J = 0.009;
@@ -34,8 +36,20 @@ LQR_control::LQR_control() {
          0, 0, 0, 10;
 
     R << 1;
-
+    // Init true state
     x << 1, 0, 0, 0;
+    // estimate state
+    xEst << 1, 0, 0, 0;
+
+    PEst << 0.1, 0, 0, 0,
+            0, 0.1, 0, 0,
+            0, 0, 0.1, 0,
+            0, 0, 0, 0.1;   
+
+    XEST << 1, 0, 0, 0;
+    // noise
+    Qsigma << 0.0001;
+    Rsigma << 0.0001;
 }
 
 LQR_control::~LQR_control() {
@@ -81,7 +95,7 @@ MatrixXd LQR_control::care(const MatrixXd &A, const MatrixXd &B, const MatrixXd 
       return (V * U.inverse()).real();
 }
 
-MatrixXd LQR_control::Runge_Kutta(MatrixXd x) {
+MatrixXd LQR_control::Runge_Kutta(MatrixXd x, MatrixXd u) {
     // -- runge-kutta --
     MatrixXd k1 = model(x, u);
     MatrixXd k2 = model(x + k1 * dt / 2.0, u);
@@ -95,20 +109,48 @@ MatrixXd LQR_control::model(MatrixXd x, MatrixXd u) {
     return x = A * x + B * u;
 }
 
+void LQR_control::Kalmanfilter()
+{
+    // gaussian distribution
+    random_device rd{};
+    mt19937 gen{rd()};
+    normal_distribution<> gaussian_d{0, 1};
+
+    // Input
+    uEst = -K * xEst;
+    // Observation
+    z = C * x + gaussian_d(gen) * Rsigma;
+    // Prediction Step
+    for (int i = 0; i < 4; i++) {
+        xPred(i, 0) = x(i, 0) + gaussian_d(gen) * Qsigma(0, 0);
+    }
+    PPred = A * PEst * A.transpose() + B * Qsigma * B.transpose();
+    // Filtering Step
+    G    = PPred * C.transpose() * (C * PPred * C.transpose() + Rsigma).inverse();
+    zEst = C * xPred;
+    xEst = xPred + G * (z - zEst);
+    PEst = (Matrix4d::Identity() - G * C) * PPred;
+}
+
 void LQR_control::simulation() {
     // save data
     FILE *fp;
-    if ((fp = fopen("data_class.txt", "w")) == NULL) {
+    if ((fp = fopen("LQR_Kalman.txt", "w")) == NULL) {
         printf("Error\n");
         exit(1);
     }
-    fprintf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\n", ts, x(0), x(1), x(2), x(3));
+    fprintf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", ts, x(0), x(1), x(2), x(3), xEst(0), xEst(1), xEst(2), xEst(3), XEST(0), XEST(1), XEST(2), XEST(3));
     // main loop
     for (ts; ts <= tf; ts += dt) {
+        // True state
         K = calcGainK();
         u = -K * x;
-        x = Runge_Kutta(x);
-        fprintf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\n", ts, x(0), x(1), x(2), x(3));
+        // Kalmanfilter
+        Kalmanfilter();
+        // True state
+        x    = Runge_Kutta(x, u);
+        XEST = Runge_Kutta(xEst, uEst);
+        fprintf(fp, "%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\t%lf\n", ts, x(0), x(1), x(2), x(3), xEst(0), xEst(1), xEst(2), xEst(3), XEST(0), XEST(1), XEST(2), XEST(3));
     }
     fclose(fp);
 }

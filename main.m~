@@ -44,10 +44,11 @@ for t = ts:dt:tf
     [K, S, P] = lqr(param.A, param.B, Q, R);
     u    = -K * x;
     uEst = -K * xEst;
+    x        = Runge_Kutta(x, u, param, dt);
     % kalmanfilter
     [xEst, PEst] =  KalmanFilter(x, u, param, PEst, dt);
     % -- runge-kutta --
-    x        = Runge_Kutta(x, u, param, dt);
+    %x        = Runge_Kutta(x, u, param, dt);
     xEst_sec = Runge_Kutta(xEst, uEst, param, dt);
   
     % -- save data --

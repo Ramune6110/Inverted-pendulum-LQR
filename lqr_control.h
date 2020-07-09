@@ -6,8 +6,9 @@ using namespace Eigen;
 
 class LQR_control 
 {
+    // LQR paramater
     private:
-        // paramater
+        // system paramater
         double M;
         double m;
         double J;
@@ -25,19 +26,42 @@ class LQR_control
         // weight
         Matrix<double, 4, 4> Q;
         Matrix<double, 1, 1> R;
-        // Init
+        // state and input
         Matrix<double, 4, 1> x;
         Matrix<double, 1, 1> u;
-        // Gain
+        // LQR Gain
         Matrix<double, 1, 4> K;
+    // Kalmanfilter parametar
+    private:
+        // noise
+        Matrix<double, 1, 1> Qsigma;
+        Matrix<double, 1, 1> Rsigma;
+        // Observation
+        Matrix<double, 1, 1> z;
+        // Kalman Gain
+        Matrix<double, 4, 1> G;
+        // state estimation
+        Matrix<double, 1, 1> uEst;
+        Matrix<double, 1, 1> zEst;
+        Matrix<double, 4, 1> xEst;
+        Matrix<double, 4, 4> PEst;
+        Matrix<double, 4, 1> xPred;
+        Matrix<double, 4, 4> PPred;
+        // estimate integral
+        Matrix<double, 4, 1> XEST;
+    // LQR function
+    private:
+        MatrixXd calcGainK();
+        MatrixXd Runge_Kutta(MatrixXd x, MatrixXd u);
+        MatrixXd model(MatrixXd x, MatrixXd u);
+        MatrixXd care(const MatrixXd &A, const MatrixXd &B, const MatrixXd &Q, const MatrixXd &R);
+    // Kalmanfilter function
+    private:
+        void Kalmanfilter();
     public:
         LQR_control();
         ~LQR_control();
         void simulation();
-        MatrixXd calcGainK();
-        MatrixXd Runge_Kutta(MatrixXd x);
-        MatrixXd model(MatrixXd x, MatrixXd u);
-        MatrixXd care(const MatrixXd &A, const MatrixXd &B, const MatrixXd &Q, const MatrixXd &R);
 };
 
 #endif // LQR_CONTROL
